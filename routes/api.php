@@ -23,6 +23,15 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 
+Route::middleware(['auth:sanctum'])->group(function (){
+
+    Route::get('logout', [AuthController::class, 'logout']);
+
+});
+
+
+
+
 Route::get('products', [ProductsController::class, 'index']);
 Route::get('products/{product}', [ProductsController::class, 'show']);
 Route::post('products',[ProductsController::class, 'store']);

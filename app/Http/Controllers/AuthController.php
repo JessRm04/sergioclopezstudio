@@ -9,6 +9,7 @@ use \stdClass;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
+
 class AuthController extends Controller
 {
    public function register(Request $request)
@@ -38,23 +39,32 @@ class AuthController extends Controller
    }
 
    public function login(Request $request)
-   {
-    if (!Auth::attempt($request->only('email', 'password')))
     {
+        if (!Auth::attempt($request->only('email', 'password')))
+        {
+            return response()
+            ->json(['message' => 'Unauthorized', 401]);
+        }
+
+        $user = User::where('email', $request['email'])->firstOrFail();
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()
-        ->json(['message' => 'Unauthorized', 401]);
-    }
+            ->json([
+                'message' => 'Hi ',$user->name,
+                'accessToken' => $token,
+                'token_type' => 'Bearer',
+                'user'=>$user,
+            ]); 
+   }
 
-    $user = User::where('email', $request['email'])->firstOrFail();
+   public function logout()
+   {
+        auth()->user()->tokens()->delete();
 
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()
-        ->json([
-            'message' => 'Hi ',$user->name,
-            'accessToken' => $token,
-            'token_type' => 'Bearer',
-            'user'=>$user,
-        ]);
+        return[
+            'message' => 'Te has desconectado.'
+        ];
    }
 }
